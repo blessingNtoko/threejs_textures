@@ -15,7 +15,8 @@ export class AppComponent implements OnInit {
     antialias: true
   });
   public controls = new OrbitControls(this.camera, this.renderer.domElement);
-  public loader = new THREE.TextureLoader();
+  public loadManager = new THREE.LoadingManager();
+  public loader = new THREE.TextureLoader(this.loadManager);
   public objects = [];
 
   ngOnInit() {
@@ -29,10 +30,10 @@ export class AppComponent implements OnInit {
     this.controls.update();
 
     this.scene.background = new THREE.Color(0x000);
-    this.camera.position.z = 2;
+    this.camera.position.z = 5;
 
     const cubeGeometry = new THREE.BoxGeometry(1, 1, 1);
-    const cubeMaterials = [
+    const materials = [
       new THREE.MeshBasicMaterial({
         map: this.loader.load('./assets/quote1.png')
       }),
@@ -50,12 +51,15 @@ export class AppComponent implements OnInit {
       }),
       new THREE.MeshBasicMaterial({
         map: this.loader.load('./assets/quote6.png')
-      })
-    ]
+      }),
+    ];
 
-    const cube = new THREE.Mesh(cubeGeometry, cubeMaterials);
-    this.scene.add(cube);
-    this.objects.push(cube);
+    this.loadManager.onLoad = () => {
+      const cube = new THREE.Mesh(cubeGeometry, materials);
+      this.scene.add(cube);
+      this.objects.push(cube);
+    };
+
 
     window.addEventListener('resize', () => {
       this.renderer.setSize(window.innerWidth, window.innerHeight);
